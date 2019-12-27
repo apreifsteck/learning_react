@@ -4,6 +4,8 @@ import Aux from '../../hocs/Aux'
 
 import Burger from '../../components/Burger/Burger'
 import BuildControls from '../../components/Burger/BuildControls/BuildControls'
+import Modal from '../../components/UI/Modal/Modal'
+import OrderSummary from '../../components/Burger/OrderSummary/OrderSumamry'
 
 const INGREDIENT_PRICES = {
     Base: 4,
@@ -22,30 +24,74 @@ class BurgerBuilder extends Component {
             Cheese: 0,
             Meat: 0,
         },
-        totalPrice: INGREDIENT_PRICES.Base
+        totalPrice: INGREDIENT_PRICES.Base,
+        purchasable: false,
+        inCheckout: false
+    }
+
+    updatePurchasable = (ingredients) => {
+        const sum = Object.values(ingredients)
+            .reduce((acc, cur) => (acc + cur), 0)
+        this.setState({ purchasable: sum > 0 })
     }
 
     addIngredientHandler = (type) => {
         const newIngredientCount = this.state.ingredients[type] + 1;
         const newIngredients = { ...this.state.ingredients };
         newIngredients[type] = newIngredientCount;
-        const newCost = Object.keys(this.state.ingredients).map((key, i) => {
-            return this.state.ingredients[key] * INGREDIENT_PRICES[key];
-        }).reduce((acc, curVal) => {
-            return acc + curVal
-        }, INGREDIENT_PRICES.Base)
+        const newCost = this.state.totalPrice + INGREDIENT_PRICES[type];
+        this.setState({ ingredients: newIngredients, totalPrice: newCost });
 
-        this.setState({ ingredients: newIngredients, totalPrice: newCost })
+        this.updatePurchasable(newIngredients);
+    }
+
+    removeIngredientHandler = (type) => {
+        if (this.state.ingredients[type] > 0) {
+            const newIngredientCount = this.state.ingredients[type] - 1;
+            const newIngredients = { ...this.state.ingredients };
+            newIngredients[type] = newIngredientCount;
+            const newCost = this.state.totalPrice - INGREDIENT_PRICES[type]
+            this.setState({ ingredients: newIngredients, totalPrice: newCost })
+
+            this.updatePurchasable(newIngredients);
+        }
+    }
+
+    toggleCheckout = () => {
+        this.setState({ inCheckout: !this.state.inCheckout })
+        // this.setState({ inCheckout: true })
+    }
+
+    continueHandler = () => {
+        alert('This will go to final checkout');
     }
 
     render() {
+
+        const disabledInfo = { ...this.state.ingredients }
+        for (let key in disabledInfo) {
+            disabledInfo[key] = disabledInfo[key] <= 0;
+        }
         return (
             <Aux>
-                <div>Burger</div>
+                <Modal
+                    modalClosed={this.toggleCheckout}
+                    show={this.state.inCheckout}>
+                    <OrderSummary
+                        ingredients={this.state.ingredients}
+                        total={this.state.totalPrice}
+                        cancel={this.toggleCheckout}
+                        continue={this.continueHandler} />
+                </Modal>
                 <Burger ingredients={this.state.ingredients} />
-                <div>${this.state.totalPrice}</div>
-                <div>Builder controls</div>
-                <BuildControls click={this.addIngredientHandler} />
+                <BuildControls
+                    ingredientAdded={this.addIngredientHandler}
+                    ingredientRemoved={this.removeIngredientHandler}
+                    disabledInfo={disabledInfo}
+                    price={this.state.totalPrice}
+                    isPurchasable={this.state.purchasable}
+                    enterCheckout={this.toggleCheckout}
+                />
             </Aux>
         );
 
