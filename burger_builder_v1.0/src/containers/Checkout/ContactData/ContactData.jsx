@@ -2,6 +2,7 @@ import React, { Component } from 'react';
 import axios from '../../../axios'
 
 import Button from '../../../components/UI/Button/Button'
+import Spinner from '../../../components/UI/Spinner/Spinner'
 
 import classes from './ContactData.module.css'
 
@@ -45,6 +46,7 @@ class ContactData extends Component {
                 console.log(response);
                 alert("Your burger has been ordered!");
                 this.setState({ loading: false });
+                this.props.history.push('/');
             })
             .catch(err => {
                 console.log(err);
@@ -55,19 +57,25 @@ class ContactData extends Component {
 
 
     render() {
+        let form = (
+            <form>
+                <input className={classes.Input} type="text" name="name" placeholder="Your name" />
+                <input className={classes.Input} type="email" name="email" placeholder="email" />
+                <input className={classes.Input} type="tel" name="phone" placeholder="phone number" />
+                <input className={classes.Input} type="text" name="street" placeholder="street" />
+                <input className={classes.Input} type="text" name="city" placeholder="city" />
+                <input className={classes.Input} type="text" name="state" placeholder="state" />
+                <input className={classes.Input} type="text" name="zip" placeholder="zip" />
+                <Button btnType="Success" clicked={this.orderNowHandler}>ORDER NOW</Button>
+            </form>
+        );
+        if (this.state.loading) {
+            form = <Spinner />
+        }
         return (
             <div className={classes.ContactData}>
                 <h4>Enter your contact info</h4>
-                <form>
-                    <input className={classes.Input} type="text" name="name" placeholder="Your name" />
-                    <input className={classes.Input} type="email" name="email" placeholder="email" />
-                    <input className={classes.Input} type="tel" name="phone" placeholder="phone number" />
-                    <input className={classes.Input} type="text" name="street" placeholder="street" />
-                    <input className={classes.Input} type="text" name="city" placeholder="city" />
-                    <input className={classes.Input} type="text" name="state" placeholder="state" />
-                    <input className={classes.Input} type="text" name="zip" placeholder="zip" />
-                    <Button btnType="Success" clicked={this.orderNowHandler}>ORDER NOW</Button>
-                </form>
+                {form}
             </div>
         );
     }

@@ -41,7 +41,9 @@ class Checkout extends Component {
                 />
                 <Route
                     path={this.props.match.url + "/contact-info"}
-                    render={() => <ContactData ingredients={this.state.ingredients} />}
+                    // Props contains history, so if you pass it on to contact data you can reroute it to another page when 
+                    // the request has been sent
+                    render={(props) => <ContactData ingredients={this.state.ingredients} {...props} />}
                     price={this.state.totalPrice}
                 />
             </div>
